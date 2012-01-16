@@ -12,7 +12,7 @@ import (
 
 var is224 = flag.Bool("224", false, "Use BLAKE-224")
 
-func calcSum(f *os.File) (sum []byte, err os.Error) {
+func calcSum(f *os.File) (sum []byte, err error) {
 	var h hash.Hash
 	if *is224 {
 		h = blake256.New224()
@@ -20,7 +20,7 @@ func calcSum(f *os.File) (sum []byte, err os.Error) {
 		h = blake256.New()
 	}
 	_, err = io.Copy(h, f)
-	sum = h.Sum()
+	sum = h.Sum(nil)
 	return
 }
 
