@@ -4,10 +4,11 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/dchest/blake256"
 	"hash"
 	"io"
 	"os"
+
+	"github.com/dchest/blake256"
 )
 
 var is224 = flag.Bool("224", false, "Use BLAKE-224")
