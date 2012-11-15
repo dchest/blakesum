@@ -1,4 +1,4 @@
-// blakesum command calculates BLAKE-256 and BLAKE-224 checksum of files.
+// blakesum command calculates BLAKE-224, -256, -384, -512 checksums of files.
 package main
 
 import (
@@ -9,17 +9,19 @@ import (
 	"os"
 
 	"github.com/dchest/blake256"
+	"github.com/dchest/blake512"
 )
 
-var is224 = flag.Bool("224", false, "Use BLAKE-224")
+var algorithms = map[int]func() hash.Hash{
+	224: blake256.New224,
+	256: blake256.New,
+	384: blake512.New384,
+	512: blake512.New,
+}
 
-func calcSum(f *os.File) (sum []byte, err error) {
-	var h hash.Hash
-	if *is224 {
-		h = blake256.New224()
-	} else {
-		h = blake256.New()
-	}
+var algoFlag = flag.Int("a", 256, "algorithm: 224, 256, 384, 512")
+
+func calcSum(f *os.File, h hash.Hash) (sum []byte, err error) {
 	_, err = io.Copy(h, f)
 	sum = h.Sum(nil)
 	return
@@ -27,39 +29,42 @@ func calcSum(f *os.File) (sum []byte, err error) {
 
 func main() {
 	flag.Parse()
+
+	fn, ok := algorithms[*algoFlag]
+	if !ok {
+		flag.Usage()
+		os.Exit(1)
+	}
+
+	h := fn()
+
 	if flag.NArg() == 0 {
 		// Read from stdin.
-		sum, err := calcSum(os.Stdin)
+		sum, err := calcSum(os.Stdin, h)
 		if err != nil {
-			fmt.Println(os.Stderr, "*** error reading from stdin")
+			fmt.Fprintf(os.Stderr, "%s\n", err)
 			os.Exit(1)
 		}
 		fmt.Printf("%x\n", sum)
 		os.Exit(0)
-	}
-	var hashname string
-	if *is224 {
-		hashname = "BLAKE-224"
-	} else {
-		hashname = "BLAKE-256"
 	}
 	exitNo := 0
 	for i := 0; i < flag.NArg(); i++ {
 		filename := flag.Arg(i)
 		f, err := os.Open(filename)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "*** error opening %q\n", filename)
+			fmt.Fprintf(os.Stderr, "(%s) %s\n", filename, err)
 			exitNo = 1
 			continue
 		}
-		sum, err := calcSum(f)
+		sum, err := calcSum(f, h)
 		f.Close()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "*** error reading %q\n", filename)
+			fmt.Fprintf(os.Stderr, "(%s) %s\n", filename, err)
 			exitNo = 1
 			continue
 		}
-		fmt.Printf("%s (%s) = %x\n", hashname, filename, sum)
+		fmt.Printf("BLAKE-%d (%s) = %x\n", h.Size()*8, filename, sum)
 	}
 	os.Exit(exitNo)
 }

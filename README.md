@@ -1,7 +1,7 @@
 BLAKESUM
 ========
 
-Utility to calculate BLAKE-256 or BLAKE-224 checksums.
+Utility to calculate BLAKE-224, -256, -384, -512 checksums.
 
 
 Installation
@@ -17,10 +17,11 @@ Alternatively, download the binary.
 Usage
 -----
 
-	blakesum [-224] [filename1] [filename2] ...
+	blakesum [-a=224|256|384|512] [filename1] [filename2] ...
 
-By default calculates BLAKE-256 sum. Pass option "-224" before filenames to
-calculate BLAKE-224.  If no filenames specified, reads from stdin.
+By default calculates BLAKE-256 sum. Pass option "-a=xxx" before filenames to
+calculate BLAKE-xxx, where xxx is 224, 256, 384, or 512.  If no filenames
+specified, reads from stdin.
 
 
 Examples
@@ -29,7 +30,7 @@ Examples
 	$ echo -n "Hello world" | blakesum
 	7ad560fefa2d287892478dccc5c724694fe21a2f8b004486cc87f76c40618575
 
-	$ echo -n "Hello world" | blakesum -224
+	$ echo -n "Hello world" | blakesum -a=224
 	fde00425968221a451c6f06f008bddc44cfdb9d8190507d0fd063707
 
 	$ blakesum /bin/sh /etc/bashrc
