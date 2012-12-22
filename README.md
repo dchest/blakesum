@@ -11,8 +11,6 @@ From source, if you have Go installed:
 
 	$ go get github.com/dchest/blakesum
 
-Alternatively, download the binary.
-
 
 Usage
 -----
