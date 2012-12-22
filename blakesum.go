@@ -22,6 +22,7 @@ var algorithms = map[int]func() hash.Hash{
 var algoFlag = flag.Int("a", 256, "algorithm: 224, 256, 384, 512")
 
 func calcSum(f *os.File, h hash.Hash) (sum []byte, err error) {
+	h.Reset()
 	_, err = io.Copy(h, f)
 	sum = h.Sum(nil)
 	return
